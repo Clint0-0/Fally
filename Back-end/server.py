@@ -1,48 +1,39 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from detoxify import Detoxify
 
 app = Flask(__name__)
 CORS(app)
 
-SLURS_SEVERE = [
-    "subhuman", "supremacy"
-]
-
-HATE_TERMS = [
-    "hate you", "kill yourself", "kys", "go die"
-]
-
-HARASSMENT = [
-    "idiot", "moron", "stupid", "dumb", "loser",
-    "pathetic", "ugly", "freak", "weirdo"
-]
-
-PROFANITY = [
-    "damn", "hell", "crap", "bastard"
-]
+# Load Detoxify model once (important for performance)
+model = Detoxify('original')
 
 
 def detect_toxicity(text):
 
-    text = text.lower()
+    results = model.predict(text)
 
-    for word in SLURS_SEVERE:
-        if word in text:
-            return "severe"
+    toxicity = results["toxicity"]
+    severe = results["severe_toxicity"]
+    insult = results["insult"]
+    threat = results["threat"]
+    obscene = results["obscene"]
 
-    for word in HATE_TERMS:
-        if word in text:
-            return "hate"
+    # Decide severity level
+    if severe > 0.7 or threat > 0.7:
+        return "severe"
 
-    for word in HARASSMENT:
-        if word in text:
-            return "harassment"
+    elif toxicity > 0.6:
+        return "hate"
 
-    for word in PROFANITY:
-        if word in text:
-            return "profanity"
+    elif insult > 0.6:
+        return "harassment"
 
-    return "clean"
+    elif obscene > 0.6:
+        return "profanity"
+
+    else:
+        return "clean"
 
 
 @app.route("/analyze", methods=["POST"])

@@ -7,3 +7,11 @@
   font-weight: bold;
 
 }
+
+/* When applied to links */
+a.toxiguard-moderated {
+
+  text-decoration: underline;
+  color: red !important;
+
+}

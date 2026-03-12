@@ -46,8 +46,8 @@ async function scanPage() {
       ["SCRIPT","STYLE","INPUT","TEXTAREA","NOSCRIPT"].includes(node.parentElement.tagName)
     ) continue;
 
-    // Skip links/buttons (prevents breaking site UI)
-    if (node.parentElement.closest("input, textarea, button, a")) continue;
+    // Skip forms and buttons but NOT links
+    if (node.parentElement.closest("input, textarea, button")) continue;
 
     let text = node.nodeValue;
 
@@ -57,12 +57,22 @@ async function scanPage() {
 
     if (result.severity !== "clean") {
 
-      const span = document.createElement("span");
+      const parent = node.parentElement;
 
-      span.className = "toxiguard-moderated";
-      span.textContent = `[Content Moderated: ${result.severity}]`;
+      // If inside a link, highlight instead of replacing
+      if (parent.tagName === "A") {
 
-      node.parentNode.replaceChild(span, node);
+        parent.classList.add("toxiguard-moderated");
+
+      } else {
+
+        const span = document.createElement("span");
+
+        span.className = "toxiguard-moderated";
+        span.textContent = `[Content Moderated: ${result.severity}]`;
+
+        node.parentNode.replaceChild(span, node);
+      }
     }
   }
 }
