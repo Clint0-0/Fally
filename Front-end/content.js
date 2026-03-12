@@ -39,6 +39,16 @@ async function scanPage() {
 
   for (let node of nodes) {
 
+    if (!node.parentElement) continue;
+
+    // Skip sensitive elements
+    if (
+      ["SCRIPT","STYLE","INPUT","TEXTAREA","NOSCRIPT"].includes(node.parentElement.tagName)
+    ) continue;
+
+    // Skip links/buttons (prevents breaking site UI)
+    if (node.parentElement.closest("input, textarea, button, a")) continue;
+
     let text = node.nodeValue;
 
     if (!text || text.trim().length < 3) continue;
@@ -49,10 +59,8 @@ async function scanPage() {
 
       const span = document.createElement("span");
 
-      span.textContent = "[Content Moderated]";
-      span.style.background = "rgba(255,0,0,0.2)";
-      span.style.padding = "2px 4px";
-      span.style.borderRadius = "4px";
+      span.className = "toxiguard-moderated";
+      span.textContent = `[Content Moderated: ${result.severity}]`;
 
       node.parentNode.replaceChild(span, node);
     }
@@ -62,4 +70,69 @@ async function scanPage() {
 
 window.addEventListener("load", () => {
   scanPage();
+});
+
+
+// Warn before sending toxic messages
+document.addEventListener("submit", async function (event) {
+
+  const form = event.target;
+
+  const inputs = form.querySelectorAll("textarea, input[type='text']");
+
+  for (let input of inputs) {
+
+    const text = input.value;
+
+    if (!text || text.trim().length < 3) continue;
+
+    const result = await checkToxicity(text);
+
+    if (result.severity !== "clean") {
+
+      const confirmSend = confirm(
+        "⚠️ This message may contain harmful language.\n\nDo you still want to send it?"
+      );
+
+      if (!confirmSend) {
+        event.preventDefault();
+        return;
+      }
+    }
+  }
+
+});
+
+
+// Warn while typing
+document.addEventListener("input", async function (event) {
+
+  const target = event.target;
+
+  if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") {
+
+    const text = target.value;
+
+    if (!text || text.trim().length < 3) return;
+
+    const result = await checkToxicity(text);
+
+    if (result.severity !== "clean") {
+
+      if (!target.dataset.warned) {
+
+        target.dataset.warned = "true";
+
+        alert("⚠️ Warning: Your message may contain harmful language.");
+
+      }
+
+    } else {
+
+      target.dataset.warned = "";
+
+    }
+
+  }
+
 });

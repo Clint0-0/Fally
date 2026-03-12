@@ -4,7 +4,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Word categories
 SLURS_SEVERE = [
     "subhuman", "supremacy"
 ]
@@ -21,6 +20,7 @@ HARASSMENT = [
 PROFANITY = [
     "damn", "hell", "crap", "bastard"
 ]
+
 
 def detect_toxicity(text):
 
