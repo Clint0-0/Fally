@@ -41,38 +41,50 @@ async function scanPage() {
 
     if (!node.parentElement) continue;
 
-    // Skip sensitive elements
     if (
       ["SCRIPT","STYLE","INPUT","TEXTAREA","NOSCRIPT"].includes(node.parentElement.tagName)
     ) continue;
 
-    // Skip forms and buttons but NOT links
     if (node.parentElement.closest("input, textarea, button")) continue;
 
     let text = node.nodeValue;
 
     if (!text || text.trim().length < 3) continue;
 
-    const result = await checkToxicity(text);
+    // Split text into words
+    const words = text.split(/\s+/);
 
-    if (result.severity !== "clean") {
+    let modifiedText = text;
+    let replaced = false;
 
-      const parent = node.parentElement;
+    for (let word of words) {
 
-      // If inside a link, highlight instead of replacing
-      if (parent.tagName === "A") {
+      const cleanWord = word.replace(/[^\w]/g, "");
 
-        parent.classList.add("toxiguard-moderated");
+      if (cleanWord.length < 3) continue;
 
-      } else {
+      const result = await checkToxicity(cleanWord);
 
-        const span = document.createElement("span");
+      if (result.severity !== "clean") {
 
-        span.className = "toxiguard-moderated";
-        span.textContent = `[Content Moderated: ${result.severity}]`;
+        const replacement =
+          `<span class="toxiguard-moderated">[Content Moderated: ${result.severity}]</span>`;
 
-        node.parentNode.replaceChild(span, node);
+        const regex = new RegExp(`\\b${cleanWord}\\b`, "gi");
+
+        modifiedText = modifiedText.replace(regex, replacement);
+
+        replaced = true;
       }
+    }
+
+    if (replaced) {
+
+      const wrapper = document.createElement("span");
+
+      wrapper.innerHTML = modifiedText;
+
+      node.parentNode.replaceChild(wrapper, node);
     }
   }
 }

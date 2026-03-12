@@ -26,7 +26,7 @@ def detect_toxicity(text):
     elif toxicity > 0.6:
         return "hate"
 
-    elif insult > 0.6:
+    elif insult > 0.35:
         return "harassment"
 
     elif obscene > 0.6:
