@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load Detoxify model once (important for performance)
-model = Detoxify('original')
+model = Detoxify('multilingual')
 
 
 def detect_toxicity(text):

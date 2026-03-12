@@ -33,6 +33,43 @@ function walkTextNodes(root) {
 }
 
 
+/* -------------------- */
+/* WEBSITE BLOCKING */
+/* -------------------- */
+
+const blockedSites = [
+  "4chan.org",
+  "examplebadsite.com"
+];
+
+function blockWebsite(){
+
+  chrome.storage.local.get(["parentalControl"], (settings)=>{
+
+    if(!settings.parentalControl) return;
+
+    const host = window.location.hostname;
+
+    for(let site of blockedSites){
+
+      if(host.includes(site)){
+
+        document.body.innerHTML = `
+        <div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Arial;flex-direction:column">
+        <h1>🚫 Website Blocked</h1>
+        <p>This site is blocked by ToxiGuard parental controls.</p>
+        </div>
+        `;
+
+      }
+
+    }
+
+  });
+
+}
+
+
 async function scanPage() {
 
   const nodes = walkTextNodes(document.body);
@@ -51,38 +88,15 @@ async function scanPage() {
 
     if (!text || text.trim().length < 3) continue;
 
-    // Split text into words
-    const words = text.split(/\s+/);
+    const result = await checkToxicity(text);
 
-    let modifiedText = text;
-    let replaced = false;
+    if (result.severity !== "clean") {
 
-    for (let word of words) {
-
-      const cleanWord = word.replace(/[^\w]/g, "");
-
-      if (cleanWord.length < 3) continue;
-
-      const result = await checkToxicity(cleanWord);
-
-      if (result.severity !== "clean") {
-
-        const replacement =
-          `<span class="toxiguard-moderated">[Content Moderated: ${result.severity}]</span>`;
-
-        const regex = new RegExp(`\\b${cleanWord}\\b`, "gi");
-
-        modifiedText = modifiedText.replace(regex, replacement);
-
-        replaced = true;
-      }
-    }
-
-    if (replaced) {
+      const replacement =
+        `<span class="toxiguard-moderated">[Content Moderated: ${result.severity}]</span>`;
 
       const wrapper = document.createElement("span");
-
-      wrapper.innerHTML = modifiedText;
+      wrapper.innerHTML = replacement;
 
       node.parentNode.replaceChild(wrapper, node);
     }
@@ -91,16 +105,33 @@ async function scanPage() {
 
 
 window.addEventListener("load", () => {
-  scanPage();
+
+  blockWebsite();
+
+  chrome.storage.local.get(["kidMode"], (settings) => {
+
+    if(settings.kidMode){
+      scanPage();
+    }
+
+  });
+
 });
 
 
-// Warn before sending toxic messages
+/* -------------------- */
+/* MESSAGE PROTECTION */
+/* -------------------- */
+
 document.addEventListener("submit", async function (event) {
 
   const form = event.target;
 
   const inputs = form.querySelectorAll("textarea, input[type='text']");
+
+  const settings = await new Promise(resolve =>
+    chrome.storage.local.get(["kidMode"], resolve)
+  );
 
   for (let input of inputs) {
 
@@ -111,6 +142,14 @@ document.addEventListener("submit", async function (event) {
     const result = await checkToxicity(text);
 
     if (result.severity !== "clean") {
+
+      if(settings.kidMode){
+
+        alert("🚫 Message blocked by parental control.");
+        event.preventDefault();
+        return;
+
+      }
 
       const confirmSend = confirm(
         "⚠️ This message may contain harmful language.\n\nDo you still want to send it?"
@@ -126,7 +165,6 @@ document.addEventListener("submit", async function (event) {
 });
 
 
-// Warn while typing
 document.addEventListener("input", async function (event) {
 
   const target = event.target;
