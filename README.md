@@ -68,6 +68,7 @@ The system uses the Detoxify multilingual model to evaluate whether a text is to
 Works in english and hindi.
 
 4. Activity Diagram: 
+
 ![alt text](<activity-diagram.png>)
 
 5.DFD diagram:
