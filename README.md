@@ -68,56 +68,14 @@ The system uses the Detoxify multilingual model to evaluate whether a text is to
 Works in english and hindi.
 
 4. Activity Diagram:
-Code:
-```mermaid
-flowchart TB
-    subgraph Frontend Components
-        UI[Popup Interface<br>popup.html / popup.js]
-        Core[Content Script<br>content.js / content.css]
-        Config[(Extension Config<br>manifest.json / Storage)]
-    end
 
-    subgraph Backend Components
-        App[Flask Server<br>server.py]
-        ML[Toxicity Engine<br>Detoxify Multilingual]
-    end
-
-    UI <-->|Updates toggles / Passwords| Config
-    Core <-->|Reads active mode| Config
-    Core <-->|HTTP REST API| App
-    App <-->|Loads & Predicts| ML
-```
-### Diagram: 
-### ![alt text](<activity-diagram.png>)
+Diagram: 
+![alt text](<activity-diagram.png>)
 
 5.DFD:
-Code:
-```mermaid
-flowchart TD
-    subgraph Client [Chrome Browser]
-        User((User))
-        DOM[Webpage DOM]
-        Ext[Chrome Extension - content.js]
-        Storage[(Local Storage)]
-    end
-    
-    subgraph Server [Local Backend]
-        API[Flask API - port 5000]
-        AI[Detoxify AI Model]
-    end
 
-    User -->|Visits site / Types message| DOM
-    DOM -->|Extracts text nodes > 3 chars| Ext
-    Ext <-->|Read/Write KidMode settings| Storage
-    Ext -->|POST /analyze JSON payload| API
-    API -->|Passes text string| AI
-    AI -->|Returns toxicity scores| API
-    API -->|JSON Response: severity level| Ext
-    Ext -->|Modifies DOM / Blocks Message| DOM
-    DOM -->|Displays UI warnings| User
-```
-### Diagram:
-### ![alt text](mermaid-diagram.png)
+Diagram:
+![alt text](mermaid-diagram.png)
 
 
 III. Key Functionalities
