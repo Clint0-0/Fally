@@ -67,14 +67,10 @@ The backend receives text from the extension and returns toxicity scores.
 The system uses the Detoxify multilingual model to evaluate whether a text is toxic or not.
 Works in english and hindi.
 
-4. Activity Diagram:
-
-Diagram: 
+4. Activity Diagram: 
 ![alt text](<activity-diagram.png>)
 
-5.DFD:
-
-Diagram:
+5.DFD diagram:
 ![alt text](mermaid-diagram.png)
 
 
