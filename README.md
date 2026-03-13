@@ -72,6 +72,7 @@ Works in english and hindi.
 ![alt text](<activity-diagram.png>)
 
 5.DFD diagram:
+
 ![alt text](mermaid-diagram.png)
 
 
