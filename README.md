@@ -69,7 +69,7 @@ Works in english and hindi.
 
 4. Activity Diagram:
 Code:
-```
+```mermaid
 flowchart TB
     subgraph Frontend Components
         UI[Popup Interface<br>popup.html / popup.js]
@@ -87,12 +87,12 @@ flowchart TB
     Core <-->|HTTP REST API| App
     App <-->|Loads & Predicts| ML
 ```
-Diagram: 
-![alt text](<activity-diagram.png>)
+### Diagram: 
+### ![alt text](<activity-diagram.png>)
 
 5.DFD:
 Code:
-```
+```mermaid
 flowchart TD
     subgraph Client [Chrome Browser]
         User((User))
@@ -116,8 +116,8 @@ flowchart TD
     Ext -->|Modifies DOM / Blocks Message| DOM
     DOM -->|Displays UI warnings| User
 ```
-Diagram:
-![alt text](mermaid-diagram.png)
+### Diagram:
+### ![alt text](mermaid-diagram.png)
 
 
 III. Key Functionalities
