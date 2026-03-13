@@ -1,7 +1,22 @@
-const PASSWORD = "1234";
-
 const kidMode = document.getElementById("kidMode");
 const parentalControl = document.getElementById("parentalControl");
+const changePasswordBtn = document.getElementById("changePassword");
+
+/* -------------------- */
+/* DEFAULT PASSWORD */
+/* -------------------- */
+
+chrome.storage.local.get(["password"], (data)=>{
+
+  if(!data.password){
+    chrome.storage.local.set({password:"1234"});
+  }
+
+});
+
+/* -------------------- */
+/* LOAD SETTINGS */
+/* -------------------- */
 
 chrome.storage.local.get(["kidMode","parentalControl"], (data)=>{
 
@@ -11,15 +26,19 @@ chrome.storage.local.get(["kidMode","parentalControl"], (data)=>{
 });
 
 
+/* -------------------- */
+/* KID MODE */
+/* -------------------- */
+
 kidMode.addEventListener("change",()=>{
 
-  chrome.storage.local.get(["parentalControl"], (data)=>{
+  chrome.storage.local.get(["parentalControl","password"], (data)=>{
 
     if(data.parentalControl){
 
       const pass = prompt("Enter parental password");
 
-      if(pass !== PASSWORD){
+      if(pass !== data.password){
 
         alert("Wrong password");
         kidMode.checked = !kidMode.checked;
@@ -36,26 +55,69 @@ kidMode.addEventListener("change",()=>{
 });
 
 
+/* -------------------- */
+/* PARENTAL CONTROL */
+/* -------------------- */
+
 parentalControl.addEventListener("change",()=>{
 
-  if(!parentalControl.checked){
+  chrome.storage.local.get(["password"], (data)=>{
 
-    const pass = prompt("Enter parental password");
+    if(!parentalControl.checked){
 
-    if(pass !== PASSWORD){
+      const pass = prompt("Enter parental password");
 
-      alert("Wrong password");
-      parentalControl.checked = true;
-      return;
+      if(pass !== data.password){
+
+        alert("Wrong password");
+        parentalControl.checked = true;
+        return;
+
+      }
 
     }
 
-  }
+    chrome.storage.local.set({parentalControl:parentalControl.checked});
 
-  chrome.storage.local.set({parentalControl:parentalControl.checked});
+  });
 
 });
 
+
+/* -------------------- */
+/* CHANGE PASSWORD */
+/* -------------------- */
+
+changePasswordBtn.addEventListener("click", ()=>{
+
+  chrome.storage.local.get(["password"], (data)=>{
+
+    const current = prompt("Enter current password");
+
+    if(current !== data.password){
+      alert("Wrong password");
+      return;
+    }
+
+    const newPass = prompt("Enter new password");
+
+    if(!newPass || newPass.length < 3){
+      alert("Password must be at least 3 characters");
+      return;
+    }
+
+    chrome.storage.local.set({password:newPass});
+
+    alert("Password changed successfully");
+
+  });
+
+});
+
+
+/* -------------------- */
+/* RESCAN PAGE */
+/* -------------------- */
 
 document.getElementById("scanBtn").addEventListener("click", () => {
 

@@ -141,15 +141,17 @@ document.addEventListener("submit", async function (event) {
 
     const result = await checkToxicity(text);
 
-    if (result.severity !== "clean") {
+      if (result.severity !== "clean") {
 
-      if(settings.kidMode){
+      const span = document.createElement("span");
 
-        alert("🚫 Message blocked by parental control.");
-        event.preventDefault();
-        return;
+      span.className = "toxiguard-moderated";
 
-      }
+      span.textContent = `[Content Moderated: ${result.severity}]`;
+
+      node.parentNode.replaceChild(span, node);
+
+}
 
       const confirmSend = confirm(
         "⚠️ This message may contain harmful language.\n\nDo you still want to send it?"
@@ -162,7 +164,7 @@ document.addEventListener("submit", async function (event) {
     }
   }
 
-});
+);
 
 
 document.addEventListener("input", async function (event) {
